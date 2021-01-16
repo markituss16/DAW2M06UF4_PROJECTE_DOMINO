@@ -1,4 +1,4 @@
-class Partida{
+export class Partida{
     constructor(codiP, jugador1,jugador2){
         this.codiP = codiP;
         this.jugador1 = jugador1;
@@ -42,5 +42,18 @@ class Partida{
         this.fitxes = fitxes;
     }
 
-    
+    barrejarFitxes(){
+        var f = this.fitxes, n = f.length, aux, nRandom;
+
+        while(0 !== n){
+            nRandom = Math.floor(Math.random() * n);
+            n -= 1;
+
+            aux = f[n];
+            f[n] = f[nRandom];
+            f[nRandom] = aux;
+        }
+
+        fitxes(f);
+    }
 }
