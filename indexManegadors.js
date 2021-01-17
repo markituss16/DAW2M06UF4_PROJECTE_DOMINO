@@ -1,4 +1,4 @@
-var server = require("#");
+var server = require("./indexDomino");
 var encaminador = require("./encaminador");
 var manegadorPeticions = require("./manegador");
 

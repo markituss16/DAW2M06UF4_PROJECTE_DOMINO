@@ -1,5 +1,3 @@
-import Jugador from './jugador';
-import Partida from './partida';
 var http = require("http");
 var url = require("url");
 var querystring = require("querystring");
@@ -13,6 +11,10 @@ var pecesJugades = [];
 var torn;
 var contingut;
 
+var peces = ["0,0", "0,1", "0,2", "0,3", "0,4", "0,5", "0,6", "1,1", "1,2", "1,3", "1,4", "1,5", "1,6", "2,2", "2,3", "2,4", "2,5", "2,6", "3,3", "3,4", "3,5",
+    "3,6", "4,4", "4,5", "4,6", "5,5", "5,6", "6,6"];
+repartirPeces(peces);
+
 //repartir peces
 
 function iniciar(encaminar,manegadorPeticions){
@@ -22,7 +24,7 @@ function iniciar(encaminar,manegadorPeticions){
         var consulta = url.parse(request.url, true).query;
         var nombre = consulta['caracter'];
 
-        contingut = encaminar(manegadorPeticion, pathname);
+        contingut = encaminar(manegadorPeticions, pathname);
         if(contingut == '/desar'){
             var ruta = 'mongodb://localhost:27017';
 
@@ -40,6 +42,7 @@ function iniciar(encaminar,manegadorPeticions){
                 response.end();
                 client.close();
             });
+            
         }else if (contingut == '/consultar') {
             var ruta = 'mongodb://localhost:27017';
             MongoClient.connect(ruta, function (err, client) {
@@ -63,10 +66,11 @@ function iniciar(encaminar,manegadorPeticions){
                     }
                 });
             });
+
         }else if(contingut == '/autenticar'){
             var ruta = 'mongodb://localhost:27017';
 
-            MongoClient.connect(rutadb, function (err, client) {
+            MongoClient.connect(ruta, function (err, client) {
                 assert.equal(null, err);
                 console.log("Connexió correcta");
                 var db = client.db('domino');
@@ -102,6 +106,201 @@ function iniciar(encaminar,manegadorPeticions){
                 }); 
                 client.close();
             });
+
+        }else if (contingut == '/index') {
+            response.writeHead(200, {
+                "Content-Type": "application/json charset=utf-8"
+            });
+            var jugs = Jugadors.length;
+            var id = consulta['idJugador'];
+            if (id == 0 && jugs == 0){
+                id = 1;
+                Jugadors.push(1);
+            }else if (id == 0 && jugs == 1){
+                id = 2;
+                Jugadors.push(2);
+            }else{
+                id;
+            }
+            console.log("El jugador " + id + " ha entrat a la partida. Número de jugadors a dins: " + Jugadors.length);
+
+            var objecteInicial = {
+                "id": id,
+                "jugadors": Jugadors
+            };
+            response.write(JSON.stringify(objecteInicial));
+            response.end();
+
+        }else if (contingut == '/canviTorn'){
+            response.writeHead(200, {
+                "Content-Type": "text/xml; charset=utf-8"
+            });
+            var objecteCanvi = {
+                "id": consulta['idJugador'],
+                "torn": torn,
+                "pecesJugades": pecesJugades
+            };
+            response.write(JSON.stringify(objecteCanvi));
+            response.end();
+
+        }else if (contingut == '/pecaJugada'){
+            response.writeHead(200, {
+                "Content-Type": "text/xml; charset=utf-8"
+            });
+            torn = consulta['torn'];
+            if(consulta['costat'] == "dropDreta"){
+                pecesJugades.push(consulta['peca']);
+            }else if(consulta['costat'] == "dropEsquerra"){
+                pecesJugades.unshift(consulta['peca']);
+            }
+            if(torn == 1){
+                torn = 2;
+            }else if(torn == 2){
+                torn = 1;
+            }
+            var objecteLlencament = {
+                "id": consulta['idJugador'],
+                "tirada": consulta['peca'],
+                "correcte": true,
+                "torn": torn,
+                "pecesJugades": pecesJugades
+            };
+            console.log(`El jugador ${consulta['idJugador']} ha llencat ${consulta['peca']}`);
+            response.write(JSON.stringify(objecteLlencament));
+            response.end();
+
+        }else if (contingut == '/comencar'){
+            response.writeHead(200, {
+                "Content-Type": "application/json charset=utf-8"
+            });
+            console.log(`Jugador ${consulta['idJugador']}`);
+            var objecteJoc = {
+                "id": consulta['idJugador'],
+                "torn": 1,
+                "peces": [
+                    "0,0", "0,1", "0,2", "0,3", "0,4", "0,5", "0,6",
+                    "1,1", "1,2", "1,3", "1,4", "1,5", "1,6",
+                    "2,2", "2,3", "2,4", "2,5", "2,6",
+                    "3,3", "3,4", "3,5", "3,6",
+                    "4,4", "4,5", "4,6",
+                    "5,5", "5,6",
+                    "6,6"
+                ],
+                "pecesJug1": jug1,
+                "pecesJug2": jug2
+            };
+            response.write(JSON.stringify(objecteJoc));
+            response.end();
+        }else if (contingut == '/imatge'){
+            response.writeHead(200, {
+                "Content-Type": "application/json charset=utf-8"
+            });
+            fs.readFile('/imatges/' + consulta['img'], function(err,sortida){
+                response.writeHead(200, {
+                    'Content-Type': 'image/png'
+                });
+                response.write(sortida);
+                response.end();
+            });
+        }else if (contingut == '/styles.css'){
+            response.writeHead(200, {
+                "Content-Type": "text/html; charset=utf-8"
+            });
+            fs.readFile('./styles.css',function(err,sortida){
+                response.writeHead(200, {
+                    'Content-Type': 'text/css'
+                });
+                response.write(sortida);
+                response.end();
+            });
+        }else if (contingut == '/puntuat'){
+            var ruta = 'mongodb://localhost:27017';
+
+            MongoClient.connect(ruta, function (err, client) {
+                assert.equal(null, err);
+                console.log("Connexió correcta");
+                var db = client.db('domino');
+                db.collection('puntuacio').insertOne({
+                    "nom": consulta.usuari,
+                    "resultat": consulta.resultat,
+                });
+                assert.equal(err,null);
+                console.log("Document afegit a la col·lecció puntuacions");
+                response.write("Resultat satisfactori");
+                response.end();
+                client.close();
+            });
+        }else if (contingut == '/puntuacio'){
+            var ruta = 'mongodb://localhost:27017';
+            MongoClient.connect(ruta, function (err, client) {
+                assert.equal(null, err);
+                console.log("Connexió correcta");
+                var db = client.db('domino');
+                response.writeHead(200, {
+                    "Content-Type": "text/html; charset=utf-8"
+                });
+                console.log("Consulta document a col·lecció usuaris");
+
+                var cursor = db.collection('puntacio').find({});
+                cursor.each(function(err,doc){
+                    assert.equal(err,null);
+                    if(doc != null){
+                        response.write(doc.nom + '' + doc.resultat + '<br>');
+                    }else{
+                        response.end();
+                        client.close();
+                    }
+                });
+            });
+        }else{
+            fs.readFile(contingut,function(err,sortida){
+                response.writeHead(200, {
+                    'Content-Type': 'text/html'
+                });
+                response.write(sortida);
+                response.end();
+            });
         }
     }
+    http.createServer(onRequest).listen(8887);
+    console.log("Servidor iniciat. http://localhost:8887");
 }
+
+function repartirPeces(peces){
+    var p = [];
+    var p1 = [];
+    var p2 = [];
+    for(var i=0; i<peces.length;){
+        nRandom = Math.floor(Math.random()*peces.length);
+        var jaPosada = false;
+        for (var j=0; j<p.length; j++){
+            if (p[j] == nRandom){
+                jaPosada = true;
+                break;
+            }else{
+                jaPosada = false;
+            }
+        }
+        p.push(nRandom);
+        if (!jaPosada){
+            if (i%2 == 1){
+                p1.push(nRandom);
+            }else if (i%2 == 0){
+                p2.push(nRandom);
+            }
+            i++;
+        }
+    }
+    retornarImgPeces(p1,p2);
+}
+
+function retornarImgPeces(pecesJug1,pecesJug2){
+    for (var i=0; i<7; i++){
+        jug1[i] = peces[pecesJug1[i]];
+    };
+    for (var j=0; j<7; j++){
+        jug2[j] = peces[pecesJug2[j]];
+    }
+}
+
+exports.iniciar = iniciar;
