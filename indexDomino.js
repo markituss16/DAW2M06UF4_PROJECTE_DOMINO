@@ -11,20 +11,33 @@ var pecesJugades = [];
 var torn;
 var contingut;
 
+class Jugador {
+    constructor(nom,password){
+        this.nom = nom;
+        this.password = password;
+    }
+}
+
+class Partida {
+    constructor(codiP){
+        this.codiP = codiP;
+    }
+}
+
+/*Es crea una variable la qual conté els strings de les peces*/
 var peces = ["0,0", "0,1", "0,2", "0,3", "0,4", "0,5", "0,6", "1,1", "1,2", "1,3", "1,4", "1,5", "1,6", "2,2", "2,3", "2,4", "2,5", "2,6", "3,3", "3,4", "3,5",
     "3,6", "4,4", "4,5", "4,6", "5,5", "5,6", "6,6"];
-repartirPeces(peces);
-
-//repartir peces
+repartirPeces(peces); //Les peces s'insereixen en la funció repartirPeces
 
 function iniciar(encaminar,manegadorPeticions){
-    function onRequest(request,respose){
+    function onRequest(request,response){
         var sortida;
         var pathname = url.parse(request.url).pathname;
         var consulta = url.parse(request.url, true).query;
-        var nombre = consulta['caracter'];
+        var nom = consulta['caracter'];
 
         contingut = encaminar(manegadorPeticions, pathname);
+        
         if(contingut == '/desar'){
             var ruta = 'mongodb://localhost:27017';
 
@@ -33,7 +46,7 @@ function iniciar(encaminar,manegadorPeticions){
                 console.log("Connexió correcta");
                 var db = client.db('domino');
                 db.collection('jugadors').insertOne({
-                    "nom": consulta.usuari,
+                    "nom": consulta.nom,
                     "password": consulta.password,
                 });
                 assert.equal(err, null);
@@ -69,7 +82,6 @@ function iniciar(encaminar,manegadorPeticions){
 
         }else if(contingut == '/autenticar'){
             var ruta = 'mongodb://localhost:27017';
-
             MongoClient.connect(ruta, function (err, client) {
                 assert.equal(null, err);
                 console.log("Connexió correcta");
@@ -84,7 +96,7 @@ function iniciar(encaminar,manegadorPeticions){
                 cursor.each(function (err, doc) {
                     assert.equal(err, null);
                     if (doc != null) {
-                        if (doc.nom == consulta.usuari && doc.password == consulta.password) {
+                        if (doc.nom == consulta.nom && doc.password == consulta.password) {
                             trobat = true;
                             response.write('Hola ' + doc.nom);
                             response.write('<form action="/partida" method="post">');
@@ -193,7 +205,7 @@ function iniciar(encaminar,manegadorPeticions){
             response.end();
         }else if (contingut == '/imatge'){
             response.writeHead(200, {
-                "Content-Type": "application/json charset=utf-8"
+                "Content-Type": "text/html; charset=utf-8"
             });
             fs.readFile('/imatges/' + consulta['img'], function(err,sortida){
                 response.writeHead(200, {
@@ -213,6 +225,8 @@ function iniciar(encaminar,manegadorPeticions){
                 response.write(sortida);
                 response.end();
             });
+        }else if (contingut == 'favicon') {
+            console.log("Hola");
         }else if (contingut == '/puntuat'){
             var ruta = 'mongodb://localhost:27017';
 
@@ -221,7 +235,7 @@ function iniciar(encaminar,manegadorPeticions){
                 console.log("Connexió correcta");
                 var db = client.db('domino');
                 db.collection('puntuacio').insertOne({
-                    "nom": consulta.usuari,
+                    "nom": consulta.nom,
                     "resultat": consulta.resultat,
                 });
                 assert.equal(err,null);
@@ -255,7 +269,7 @@ function iniciar(encaminar,manegadorPeticions){
         }else{
             fs.readFile(contingut,function(err,sortida){
                 response.writeHead(200, {
-                    'Content-Type': 'text/html'
+                    "Content-Type": "text/html; charset=utf-8"
                 });
                 response.write(sortida);
                 response.end();
@@ -266,6 +280,7 @@ function iniciar(encaminar,manegadorPeticions){
     console.log("Servidor iniciat. http://localhost:8887");
 }
 
+//Mètode per a fer el repartiment de peces
 function repartirPeces(peces){
     var p = [];
     var p1 = [];
@@ -294,6 +309,7 @@ function repartirPeces(peces){
     retornarImgPeces(p1,p2);
 }
 
+//Mètode per a retornar la imatge de les peces correponents amb el seu valor
 function retornarImgPeces(pecesJug1,pecesJug2){
     for (var i=0; i<7; i++){
         jug1[i] = peces[pecesJug1[i]];

@@ -7,10 +7,19 @@ window.onload = function() {
     var dada;
     document.getElementById("missatge").innerText = "Esperant a l'altre jugador";
     idInterval = setInterval(function() {
-        cridaAJAXinicial('/index?ididJugador=' + id);
+        cridaAJAXinicial('/index?idJugador=' + id);
     }, 3000);
 };
 
+/*Funció feta amb fetch
+function cridaFetchInicial(url){
+    fetch(url, {
+        method: 'POST'        
+    }).then(function(response) {
+
+    })
+}*/
+/*Funció feta amb AJAX*/
 function cridaAJAXinicial(url){
     var xhr = new XMLHttpRequest();
         if(!xhr){
@@ -34,7 +43,7 @@ function callbackAJAXinicial() {
 }
 
 //Mostra l'index de la pàgina
-function mostrarIndex() {
+function mostrarInici() {
     var jugadors = dada.jugadors;
     id = dada.id;
     if(jugadors.length < 2){

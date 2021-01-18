@@ -35,7 +35,7 @@ function consultar(){
 }
 
 function autenticar(){
-    return '/comprovar';
+    return '/autenticar';
 }
 
 function index(){
@@ -56,6 +56,10 @@ function comencar(){
 
 function imatges(){
     return '/imatges';
+}
+
+function favicon(){
+    return 'favicon';
 }
 
 function puntuar(){
@@ -85,6 +89,7 @@ exports.canviTorn = canviTorn;
 exports.pecaJugada = pecaJugada;
 exports.comencar = comencar;
 exports.imatges = imatges;
+exports.favicon = favicon;
 exports.puntuar = puntuar;
 exports.puntuat = puntuat;
 exports.puntuacio = puntuacio;

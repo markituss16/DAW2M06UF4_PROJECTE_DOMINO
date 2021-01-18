@@ -18,6 +18,7 @@ manegador["/canviTorn"] = manegadorPeticions.canviTorn;
 manegador["/pecaJugada"] = manegadorPeticions.pecaJugada;
 manegador["/comencar"] = manegadorPeticions.comencar;
 manegador["/imatges"] = manegadorPeticions.imatges;
+manegador["/favicon.ico"] = manegadorPeticions.favicon;
 manegador["/puntuar"] = manegadorPeticions.puntuar;
 manegador["/puntuat"] = manegadorPeticions.puntuat;
 manegador["/puntuacio"] = manegadorPeticions.puntuacio;
